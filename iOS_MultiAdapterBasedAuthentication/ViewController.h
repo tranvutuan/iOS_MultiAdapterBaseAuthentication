@@ -7,20 +7,24 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TNAPassLock.h"
 #import "TNAInvokeListener.h"
 #import "TNAChallengeHander.h"
 #import "TNAConnectionListener.h"
-
 typedef enum {
-    Type1,
-    Type2,
-    Type3
+    SubmitAuthenticationType,
+    FailureMessageType,
+    SuccessMessageType,
+    LogoutType
 } AlertViewType;
 
-@interface ViewController : UIViewController <WLDelegate>
+
+@interface ViewController : UIViewController <WLDelegate,TNAPassLockDelegate>
 @property (strong, nonatomic) IBOutlet UIButton *connectingButton;
 @property (strong, nonatomic) TNAInvokeListener *invokeLinster;
 -(void)showLoginForm;
--(void)showQuestionForm;
--(void)displayMessage:(NSString*)secretData;
+-(void)showPassLock;
+-(void)displayMessage:(NSString*)secretData withError:(BOOL)err;
+-(void)submitAuthSilence;
+-(void)dismissPassLock;
 @end

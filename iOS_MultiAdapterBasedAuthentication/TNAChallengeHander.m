@@ -15,7 +15,7 @@
 -(BOOL)isCustomResponse:(WLResponse *)response {
     //NSLog(@"TNA0 %@",[response getResponseJson]);
     NSDictionary *dict = [response getResponseJson];
-    if (!response.responseText)
+    if (!response || !response.responseText)
         return false;
     
 	if (dict[@"authRequired"] != nil  )
@@ -27,30 +27,49 @@
 
 #pragma mark - Handle the challenge
 -(void)handleChallenge: (WLResponse *)response {
+    //NSLog(@"TNA8 %@",[response getResponseJson]);
+    AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+
     NSDictionary *responseJSON = [response getResponseJson];
     if ([responseJSON[@"authRequired"] intValue] == 1) {
-        if ([responseJSON[@"authStep"] intValue] == 2)
-            [self.controller showQuestionForm];
-        else if ([responseJSON[@"authStep"] intValue] == 1 && [responseJSON[@"errorMessage"] isKindOfClass:[NSNull class]] )
-            [self.controller showLoginForm];
+        if ([responseJSON[@"authStep"] intValue] == 2) {
+            [self.controller showPassLock];
+            [TNAMonitor sharedInstance].firstValidationPassed = YES;
+        }
+        else if ([responseJSON[@"authStep"] intValue] == 1 && [responseJSON[@"errorMessage"] isKindOfClass:[NSNull class]] ) {
+            NSString *usr = [delegate.keychainWrapper objectForKey:(__bridge id)(kSecAttrAccount)];
+            NSString *pwd = [delegate.keychainWrapper objectForKey:(__bridge id)(kSecValueData)];
+            if( usr.length > 0 && pwd.length > 0 ) {
+                //NSLog(@"TNA*****");
+                [self.controller submitAuthSilence];
+            }            
+            else
+                [self.controller showLoginForm];
+        }
         else
-            [self.controller displayMessage:responseJSON[@"errorMessage"]];
+            [self.controller displayMessage:responseJSON[@"errorMessage"] withError:YES];
+        
     }
-    else
+    else {
+        /* Store usr and pwd into keychain wrapper */
+        [delegate.keychainWrapper setObject:self.usr forKey:(__bridge id)(kSecAttrAccount)];
+        [delegate.keychainWrapper setObject:self.pwd forKey:(__bridge id)(kSecValueData)];
+        
         [self submitSuccess:response];
+    }
 }
 
 #pragma mark - WLDelegate
 -(void) onFailure:(WLFailResponse *)response {
-   // NSLog(@"TNA3 %@",[response getResponseJson]);
+    //NSLog(@"TNA3 %@",[response getResponseJson]);
     [self submitFailure:response];
-    [self.controller displayMessage:response.responseText];
+    [self.controller displayMessage:response.responseText withError:YES];
 }
 -(void) onSuccess:(WLResponse *)response {
-    // NSLog(@"TNA4 %@",[response getResponseJson]);
+    //NSLog(@"TNA4 %@",[response getResponseJson]);
     [self submitSuccess:response];
     NSString *message = [response getResponseJson][@"errorMessage"];
-    [self.controller displayMessage:message];
+    [self.controller displayMessage:message withError:YES];
 }
 
 

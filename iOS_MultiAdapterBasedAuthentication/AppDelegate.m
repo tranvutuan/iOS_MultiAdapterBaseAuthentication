@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "TNAChallengeHander.h"
 
 @implementation AppDelegate
 
@@ -20,6 +21,9 @@
     self.submitAuthStep2 = [[WLProcedureInvocationData alloc]  initWithAdapterName:NSLocalizedString(@"adapterName", nil)
                                                                      procedureName:NSLocalizedString(@"procedureStep2", nil)];
     self.challengeHandler = [[TNAChallengeHander alloc] initWithRealm:NSLocalizedString(@"realmName", nil)];
+
+    self.keychainWrapper = [[KeychainItemWrapper alloc] initWithIdentifier:NSLocalizedString(@"userCredentail", nil) accessGroup:nil];
+    NSLog(@"%@, %@", [self.keychainWrapper objectForKey:(__bridge id)(kSecAttrAccount)], [self.keychainWrapper objectForKey:(__bridge id)(kSecValueData)]);
 
     [[WLClient sharedInstance] wlConnectWithDelegate:self];
 
