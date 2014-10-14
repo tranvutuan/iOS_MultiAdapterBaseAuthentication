@@ -133,7 +133,7 @@
     if (err) {
         
         if ([TNAMonitor sharedInstance].firstValidationPassed) {
-            if ([TNAMonitor sharedInstance].currAttempt < MAX_ATTEMPTS) { // Number of attempt is < 3
+            if ([TNAMonitor sharedInstance].currAttempt < MAX_ATTEMPTS) { // Number of attempt is < 2
                 [TNAMonitor sharedInstance].currAttempt++;
                 [self showAlertViewWith:message andTag:FailureMessageType];
             }
